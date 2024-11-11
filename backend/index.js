@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const UserRoutes = require('./routes/UserRoutes')
 
 const app = express()
 
@@ -13,9 +14,7 @@ app.use(cors({credentials: true, origin:'http://localhost:3000'}))
 app.use(express.static('public'))
 
 // Routes
-
-app.listen(5000)
-
+app.use('/users', UserRoutes);
 
 // Ensure that the backend always runs on port 5555
 const PORT = process.env.PORT || 5555;
