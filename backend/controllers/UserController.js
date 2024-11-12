@@ -99,6 +99,20 @@ module.exports = class UserController {
         }
         response.status(200).send(currentUser)
     }
+    
+    static async getUserById(request,response){
+        const id = request.params.id
+
+        const user = await User.findById(id).select('-password') //Remove the password field when the request is made
+
+        if(!user) {
+            response.status(422).json({
+                message: 'User not found'
+            })
+            return
+        }
+        response.status(200).json({user})
+    }
 
     static validateFields(fields) {
         const errors = [];
