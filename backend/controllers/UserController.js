@@ -114,6 +114,12 @@ module.exports = class UserController {
         response.status(200).json({user})
     }
 
+    static async editUser(request,response){
+        response.status(200).json({
+           message: "User edited successfully"
+        })
+    }
+
     static validateFields(fields) {
         const errors = [];
         const { name, email, phone, password, confirmPassword } = fields;
