@@ -43,6 +43,38 @@ module.exports = class UserController {
         }
     } 
 
+    static async login(request,response) {
+        const { email, password } = request.body;
+
+        if(!email){
+            response.status(422).json({message: "Email is required"})
+            return
+        }
+
+        if(!password){
+            response.status(422).json({message: "Password is required"})
+            return
+        }
+
+        const user = await User.findOne({email:email})
+
+        if(!user){
+            response.status(422).json({message: "There is no registered user with this email"})
+            return
+        }
+
+        // Check if password match with mongoDB password
+        const checkPassword = await bcrypt.compare(password, user.password)
+
+        if(!checkPassword) {
+            response.status(422).json({message: "Invalid Password"})
+            return
+        }
+
+        // Generate and send token to the user
+        await createUserToken(user, request, response);
+    }
+
     static validateFields(fields) {
         const errors = [];
         const { name, email, phone, password, confirmPassword } = fields;
