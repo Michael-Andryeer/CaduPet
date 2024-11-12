@@ -1,8 +1,15 @@
 // Importações
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const createUserToken = require('../helpers/create-user-token');
+const jwt = require('jsonwebtoken')
 // Importações
+
+
+//helpers
+const createUserToken = require('../helpers/create-user-token')
+const getToken = require('../helpers/get-token')
+//helpers
+
 
 module.exports = class UserController {
     static async register(request, response) {
@@ -73,6 +80,24 @@ module.exports = class UserController {
 
         // Generate and send token to the user
         await createUserToken(user, request, response);
+
+        
+    }
+
+    static async checkuser(request,response){
+        let currentUser
+
+        if(request.headers.authorization){
+            const token = getToken(request)
+            const decoded = jwt.verify(token, 'mysecret')
+
+            currentUser = await User.findById(decoded.id)
+
+            currentUser.password = undefined
+        } else {
+            currentUser = null
+        }
+        response.status(200).send(currentUser)
     }
 
     static validateFields(fields) {
