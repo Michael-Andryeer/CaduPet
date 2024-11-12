@@ -1,8 +1,8 @@
-//Importações
+// Importações
 const User = require('../models/User');
-const bcrypt = require('bcrypt')
-//Importações
-
+const bcrypt = require('bcrypt');
+const createUserToken = require('../helpers/create-user-token');
+// Importações
 
 module.exports = class UserController {
     static async register(request, response) {
@@ -26,25 +26,22 @@ module.exports = class UserController {
 
         // Hash the password
         const salt = await bcrypt.genSalt(12);
-        const hashPassword = await bcrypt.hash(password,salt)
+        const hashPassword = await bcrypt.hash(password, salt);
 
         const user = new User({
             name,
             email,
             phone,
-            password: hashPassword //Passa a senha criptografa quando cadastra um usuário
-        })
+            password: hashPassword // Pass the encrypted password when registering the user
+        });
 
-        try{
-          const newUser = await user.save()
-          response.status(201).json({
-            message: 'User registered succesfully',
-            newUser,
-          })
-        } catch(error) {
-           response.status(500).json({message: error})
+        try {
+            const newUser = await user.save();
+            await createUserToken(newUser, request, response);
+        } catch (error) {
+            response.status(500).json({ message: error });
         }
-    }
+    } 
 
     static validateFields(fields) {
         const errors = [];
