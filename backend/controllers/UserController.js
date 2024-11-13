@@ -1,139 +1,211 @@
-// Importações
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
+// Imports
+const User = require('../models/User')
+const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-// Importações
+// Imports
 
-
-//helpers
+// helpers
 const createUserToken = require('../helpers/create-user-token')
 const getToken = require('../helpers/get-token')
-//helpers
-
+const getUserByToken = require('../helpers/get-user-by-token')
+// helpers
 
 module.exports = class UserController {
     static async register(request, response) {
-        const { name, email, phone, password, confirmPassword } = request.body;
-
-        // Execute validations
-        const errors = UserController.validateFields({ name, email, phone, password, confirmPassword });
-        if (errors.length > 0) {
-            return response.status(400).json({ errors });
-        }
-
-        try {
-            // Check if user already exists based on email
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                return response.status(400).json({ message: 'User with this email already exists' });
-            }
-        } catch (error) {
-            return response.status(500).json({ message: 'An error occurred while checking user existence', error });
-        }
-
-        // Hash the password
-        const salt = await bcrypt.genSalt(12);
-        const hashPassword = await bcrypt.hash(password, salt);
-
-        const user = new User({
-            name,
-            email,
-            phone,
-            password: hashPassword // Pass the encrypted password when registering the user
-        });
-
-        try {
-            const newUser = await user.save();
-            await createUserToken(newUser, request, response);
-        } catch (error) {
-            response.status(500).json({ message: error });
-        }
-    } 
-
-    static async login(request,response) {
-        const { email, password } = request.body;
-
-        if(!email){
-            response.status(422).json({message: "Email is required"})
-            return
-        }
-
-        if(!password){
-            response.status(422).json({message: "Password is required"})
-            return
-        }
-
-        const user = await User.findOne({email:email})
-
-        if(!user){
-            response.status(422).json({message: "There is no registered user with this email"})
-            return
-        }
-
-        // Check if password match with mongoDB password
-        const checkPassword = await bcrypt.compare(password, user.password)
-
-        if(!checkPassword) {
-            response.status(422).json({message: "Invalid Password"})
-            return
-        }
-
-        // Generate and send token to the user
-        await createUserToken(user, request, response);
-
+        const { name, email, phone, password, confirmpassword } = request.body
         
-    }
-
-    static async checkuser(request,response){
-        let currentUser
-
-        if(request.headers.authorization){
-            const token = getToken(request)
-            const decoded = jwt.verify(token, 'mysecret')
-
-            currentUser = await User.findById(decoded.id)
-
-            currentUser.password = undefined
-        } else {
-            currentUser = null
+        if (!name) {
+            response.status(422).json({ message: 'Name is required' })
+            return
         }
-        response.status(200).send(currentUser)
-    }
-    
-    static async getUserById(request,response){
-        const id = request.params.id
 
-        const user = await User.findById(id).select('-password') //Remove the password field when the request is made
+        if (!email) {
+            response.status(422).json({ message: 'Email is required' })
+            return
+        }
 
-        if(!user) {
+        if (!phone) {
+            response.status(422).json({ message: 'Phone number is required' })
+            return
+        }
+
+        if (!password) {
+            response.status(422).json({ message: 'Password is required' })
+            return
+        }
+
+        if (!confirmpassword) {
+            response.status(422).json({ message: 'Password confirmation is required' })
+            return
+        }
+
+        if (confirmpassword !== password) {
             response.status(422).json({
-                message: 'User not found'
+                message: 'Passwords must match!'
             })
             return
         }
-        response.status(200).json({user})
-    }
 
-    static async editUser(request,response){
-        response.status(200).json({
-           message: "User edited successfully"
-        })
-    }
+        // check if user exists
+        const userExists = await User.findOne({ email: email })
 
-    static validateFields(fields) {
-        const errors = [];
-        const { name, email, phone, password, confirmPassword } = fields;
-
-        if (!name) errors.push({ field: 'name', message: 'Name is required' });
-        if (!email) errors.push({ field: 'email', message: 'Email is required' });
-        if (!phone) errors.push({ field: 'phone', message: 'Phone is required' });
-        if (!password) errors.push({ field: 'password', message: 'Password is required' });
-        if (!confirmPassword) errors.push({ field: 'confirmPassword', message: 'ConfirmPassword is required' });
-        
-        // Check if password and confirmPassword match
-        if (password && confirmPassword && password !== confirmPassword) {
-            errors.push({ field: 'confirmPassword', message: 'Passwords do not match' });
+        if (userExists) {
+            response.status(422).json({
+                message: 'This email is already registered. Please use another one!'
+            })
+            return
         }
-        return errors;
+
+        // create password
+        const salt = await bcrypt.genSalt(12)
+        const passwordHash = await bcrypt.hash(password, salt)
+
+        // create a user
+        const user = new User({
+            name: name,
+            email: email,
+            phone: phone,
+            password: passwordHash,
+        })
+
+        try {
+            const newUser = await user.save()
+            await createUserToken(newUser, request, response)
+        } catch (error) {
+            response.status(500).json({ message: error })
+        }
     }
-};
+
+    static async login(request, response) {
+        const { email, password } = request.body
+
+        if (!email) {
+            response.status(422).json({ message: 'Email is required' })
+            return
+        }
+
+        if (!password) {
+            response.status(422).json({ message: 'Password is required' })
+            return
+        }
+
+        // check if user exists
+        const user = await User.findOne({ email: email })
+
+        if (!user) {
+            response.status(422).json({
+                message: 'No user registered with this email'
+            })
+            return
+        }
+
+        // check if the password matches the one in the database
+        const checkPassword = await bcrypt.compare(password, user.password)
+
+        if (!checkPassword) {
+            response.status(422).json({
+                message: 'Invalid password'
+            })
+            return
+        }
+
+        await createUserToken(user, request, response)
+    }
+
+    static async checkUser(request, response) {
+        let currentUser;
+
+        if (request.headers.authorization) {
+            const token = getToken(request);
+            const decoded = jwt.verify(token, 'nossosecret');
+
+            currentUser = await User.findById(decoded.id).select('-password');
+        } else {
+            currentUser = null;
+        }
+
+        response.status(200).send(currentUser);
+    }
+
+    static async getUserById(request, response) {
+        const id = request.params.id
+
+        try {
+            const user = await User.findById(id).select('-password')
+
+            response.status(200).json({ user })
+        } catch (error) {
+            return response.status(422).json({ message: 'User not found!' })
+        }
+    }
+
+    static async editUser(request, response) {
+        const token = getToken(request)
+
+        const user = await getUserByToken(token)
+
+        const name = request.body.name
+        const email = request.body.email
+        const phone = request.body.phone
+        const password = request.body.password
+        const confirmpassword = request.body.confirmpassword
+
+        let image = ''
+
+        if (request.file) {
+            user.image = request.file.filename
+        }
+
+        // validations
+        if (!name) {
+            return response.status(422).json({ message: 'Name is required!' })
+        }
+
+        user.name = name
+
+        if (!email) {
+            return response.status(422).json({ message: 'Email is required!' })
+        }
+
+        // check if user exists
+        const userExists = await User.findOne({ email: email })
+
+        if (user.email !== email && userExists) {
+            return response.status(422).json({ message: 'Please use another email!' })
+        }
+
+        user.email = email
+
+        if (!phone) {
+            return response.status(422).json({ message: 'Phone is required!' })
+        }
+
+        user.phone = phone
+
+        // check if password matches
+        if (password && password !== confirmpassword) {
+            return response.status(422).json({ error: 'Passwords do not match.' })
+        } else if (password === confirmpassword && password != null) {
+            // creating password
+            const salt = await bcrypt.genSalt(12)
+            const passwordHash = await bcrypt.hash(password, salt)
+
+            user.password = passwordHash
+        }
+
+        try {
+            // returns updated data
+            const updatedUser = await User.findOneAndUpdate(
+                { _id: user._id },
+                { $set: user },
+                { new: true },
+            )
+            return response.json({
+                message: 'User updated successfully!',
+                data: updatedUser,
+            })
+        } catch (error) {
+            return response.status(500).json({ message: error })
+        }
+    }
+}
