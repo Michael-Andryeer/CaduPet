@@ -150,7 +150,9 @@ module.exports = class UserController {
         const password = request.body.password
         const confirmpassword = request.body.confirmpassword
 
-        let image = ''
+        if(request.file){
+            user.image = request.file.filename
+        }
 
         if (request.file) {
             user.image = request.file.filename
