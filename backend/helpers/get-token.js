@@ -1,7 +1,6 @@
 const getToken = (request) => {
     const authHeader = request.headers.authorization;
 
-    
     //Checks if the authorization header is present and contains the token
     
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
