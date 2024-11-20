@@ -12,7 +12,7 @@ const Pet = mongoose.model (
             type: Number,
             required: true
         },
-        weight: {
+        weigth: {
             type: Number,
             required: true
         },
