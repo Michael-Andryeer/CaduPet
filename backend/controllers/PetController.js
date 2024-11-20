@@ -80,4 +80,14 @@ module.exports = class PetController{
             response.status(500).json({message: error})
         }
     }
+
+    static async getAll(request,response){
+
+        // Ordena pelos mais novos inseridos
+        const pets = await Pet.find().sort('-createAt')
+
+        response.status(200).json({
+            pets: pets,
+        })
+    }
 }
