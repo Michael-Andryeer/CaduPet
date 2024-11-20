@@ -165,8 +165,126 @@ module.exports = class PetController{
             response.status(422).json({
                 message: 'You are not authorized to remove this pet'
             })
+            return
         }
         await Pet.findByIdAndDelete(id)
         response.status(200).json({ message: 'Pet removed successfully' })
+    }
+
+    static async updatePetById(request,response){
+
+        const id = request.params.id
+
+        const {name,age,weigth,color, available} = request.body
+
+        const images =  request.files
+
+        // The pet's data will be saved here
+        const updatedData = {}
+
+        const pet = await Pet.findOne({_id: id})
+        if(!pet){
+            response.status(404).json({ message: 'Pet not found!' })
+            return
+        }
+        
+        const token = getToken(request)
+        const user =  await getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString()) {
+            response.status(422).json({
+                message: 'You are not authorized to update this pet'
+            })
+            return
+        }
+
+        //validations
+        if(!name){
+            response.status(422).json({ message: 'Name is required' })
+            return
+        } else {
+            updatedData.name = name
+        }
+
+        if(!color){
+            response.status(422).json({ message: 'Color is required' })
+            return
+        } else {
+            updatedData.color = color
+        }
+
+        if(!age){
+            response.status(422).json({ message: 'Age is required' })
+            return
+        } else {
+            updatedData.age = age
+        }
+
+        if(!weigth){
+            response.status(422).json({ message: 'Weigth is required' })
+            return
+        } else {
+            updatedData.weigth = weigth
+        }
+
+        // Checks if images is defined and is an array
+        if (!images || !Array.isArray(images) || images.length === 0) {
+            response.status(422).json({ message: 'Images are required' });
+            return;
+        } else {
+            updatedData.images = []
+            images.map((image) => {
+                updatedData.images.push(image.filename)
+            })
+        }
+        await Pet.findByIdAndUpdate(id,updatedData)
+
+        response.status(200).json({
+            message: 'Pet updated successfully',
+        })
+    }
+
+    static async schedule(request,response){
+
+        const id = request.params.id
+
+
+        //check if pet exists
+        const pet = await Pet.findOne({_id: id})
+
+        if(!pet){
+            response.status(404).json({ message: 'Pet not found!' })
+            return
+        }
+
+        // check if user registered the pet
+        const token = getToken(request)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.equals(user._id)) {
+            response.status(422).json({ message: 'You cannot schedule an appointment for your own pet!' })
+            return
+        }
+
+        // check if user has already scheduled a visit
+        if(pet.adopter) {
+            if(pet.adopter._id.equals(user._id)){
+                response.status(422).json({ message: 'You have already scheduled an appointment for this pet!' })
+                return
+            }
+        }
+
+        // add user to pet
+        pet.adopter = {
+            _id: user._id,
+            name: user.name,
+            image: user.image,
+            phone: user.phone
+        }
+        await Pet.findByIdAndUpdate(id,pet)
+        
+        response.status(200).json({
+            message: `The visit has been successfully scheduled, please contact ${pet.user.name} at ${pet.user.phone}`
+        })
     }
 }
