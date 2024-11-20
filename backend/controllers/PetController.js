@@ -121,10 +121,9 @@ module.exports = class PetController{
     static async getPetById(request,response){
         const id = request.params.id
 
-
         if(!objectId.isValid(id)){
             response.status(422).json({ message: 'Invalid id' })
-            return
+        return
         }
 
         // check if pet exists
@@ -138,5 +137,36 @@ module.exports = class PetController{
         response.status(200).json({
             pet: pet,
         })
+    }
+
+    static async removePetById(request,response){
+
+        const id = request.params.id
+
+        // check if Id is valid
+        if(!objectId.isValid(id)){
+            response.status(422).json({ message: 'Invalid id' })
+        return
+        }
+
+        const pet = await Pet.findOne({_id: id})
+
+        if(!pet){
+            response.status(404).json({ message: 'Pet not found!' })
+            return
+        }
+
+        // Check if the logged-in user has registered the pet, to prevent a user from removing another user's pet
+        const token = getToken(request)
+        const user =  await getUserByToken(token)
+
+
+        if (pet.user._id.toString() !== user._id.toString()) {
+            response.status(422).json({
+                message: 'You are not authorized to remove this pet'
+            })
+        }
+        await Pet.findByIdAndDelete(id)
+        response.status(200).json({ message: 'Pet removed successfully' })
     }
 }
