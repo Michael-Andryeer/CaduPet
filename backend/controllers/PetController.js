@@ -287,4 +287,32 @@ module.exports = class PetController{
             message: `The visit has been successfully scheduled, please contact ${pet.user.name} at ${pet.user.phone}`
         })
     }
+
+    static async concludedAdoption (request,response){
+        const id = request.params.id
+
+        const pet = await Pet.findOne({_id:id})
+
+        if(!pet){
+            response.status(404).json({ message: 'Pet not found!' })
+            return
+        }
+
+        const token = getToken(request)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString()){
+            response.status(422).json({ message: 'You are not authorized to conclude this adoption' })
+            return
+        }
+        
+
+        pet.available = false
+
+        await Pet.findByIdAndUpdate(id,pet)
+
+        response.status(200).json({
+            message: 'Adoption concluded successfully',
+        })
+    }
 }
