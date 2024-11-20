@@ -117,13 +117,12 @@ module.exports = class UserController {
 
         if (request.headers.authorization) {
             const token = getToken(request);
-            const decoded = jwt.verify(token, 'nossosecret');
+            const decoded = jwt.verify(token, 'mysecret');
 
             currentUser = await User.findById(decoded.id).select('-password');
         } else {
             currentUser = null;
         }
-
         response.status(200).send(currentUser);
     }
 
