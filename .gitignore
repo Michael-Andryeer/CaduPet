@@ -55,3 +55,9 @@ Thumbs.db
 *.tmp
 *.temp
 *.bak 
+
+# Conexão com o banco de dados
+/db/conn.js  # ou o caminho correto para o seu arquivo de conexão
+
+# Imagens
+public/images/  # Ignora todas as imagens na pasta public/images

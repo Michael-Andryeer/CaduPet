@@ -19,15 +19,15 @@ const imageStorage = multer.diskStorage({
     filename: function(request, file, callback) {
         // Generates a unique filename using the current timestamp (Date.now())
         // `path.extname(file.originalname)` extracts the file extension (e.g., .jpg, .png) from the original file name
-        callback(null, Date.now() + path.extname(file.originalname)) // Combines timestamp and file extension for a unique filename
+        callback(null, Date.now() + String(Math.floor(Math.random() * 100)) +path.extname(file.originalname)) // Combines timestamp and file extension for a unique filename
     }
 })
 
 const imageUpload = multer({
     storage: imageStorage,
     fileFilter(request,file,callback){
-        if(!file.originalname.match(/\.(png|jpg)$/)){
-            return callback(new Error('Only.png and.jpg format are allowed'))
+        if(!file.originalname.match(/\.(png|jpg|jpeg)$/)){
+            return callback(new Error('Only .png, .jpg and .jpeg format are allowed'))
         }
         callback(undefined,true)
     }

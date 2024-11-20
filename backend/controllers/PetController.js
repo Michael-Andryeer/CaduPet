@@ -15,7 +15,13 @@ module.exports = class PetController{
 
         const available = true
 
-        // upload images
+        const images = request.files
+
+        // Checks if images is defined and is an array
+        if (!images || !Array.isArray(images) || images.length === 0) {
+            response.status(422).json({ message: 'Images are required' });
+            return;
+        }
 
         // validations
         if (!name){
@@ -37,6 +43,7 @@ module.exports = class PetController{
             response.status(422).json({ message: 'Color is required' })
             return
         }
+
         // validations
 
         // get pet owner
@@ -58,6 +65,10 @@ module.exports = class PetController{
                 phone: user.phone
             },
         })
+
+        images.map((image) => {
+            pet.images.push(image.filename)
+        })  
 
         try {
             const newPet = await pet.save()
