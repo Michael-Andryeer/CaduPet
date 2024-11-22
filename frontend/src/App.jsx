@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 // Components
-import Footer from './components/layout/footer'
-import NavBar from './components/layout/navbar'
+import Footer from './components/layout/Footer'
+import NavBar from './components/layout/NavBar'
+import Container from './components/layout/Container'
 // Components
 
 // pages
@@ -15,13 +16,16 @@ function App() {
   return (
     <Router>
       <NavBar />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Home />} />
-      </Routes>
+      <Container>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </Container>
       <Footer />
     </Router>
   )
 }
 export default App
+
