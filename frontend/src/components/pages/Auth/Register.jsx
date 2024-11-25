@@ -72,3 +72,4 @@ export default function Register() {
   )
 }
 
+// Parei na aula de criar o objeto usuário!!!
