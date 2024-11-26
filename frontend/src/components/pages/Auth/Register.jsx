@@ -71,5 +71,3 @@ export default function Register() {
     </section>
   )
 }
-
-// Parei na aula de criar o objeto usuário!!!

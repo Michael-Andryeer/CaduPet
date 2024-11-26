@@ -12,9 +12,14 @@ import Register from './components/pages/Auth/Register'
 import Home from './components/pages/Home'
 // pages
 
+// Context
+import { UserProvider } from 'context/userContext'
+// Context
+
 function App() {
   return (
     <Router>
+      <UserProvider>
       <NavBar />
       <Container>
         <Routes>
@@ -24,6 +29,7 @@ function App() {
         </Routes>
       </Container>
       <Footer />
+      </UserProvider>
     </Router>
   )
 }
