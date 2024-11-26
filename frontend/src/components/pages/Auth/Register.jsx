@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Input from '../../form/Input'
+
+// Context
+  import { Context } from  '../../../context/UserContext'
+// Context
 
 export default function Register() {
   const [user, setUser] = useState({})
+  const {register} =  useContext(Context)
 
   function handleChange(e) {
     setUser({ ...user, [e.target.name]: e.target.value })
@@ -10,8 +15,7 @@ export default function Register() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    // Enviar usuario para o banco de dados
-    console.log(user)
+    register()
   }
 
   return (

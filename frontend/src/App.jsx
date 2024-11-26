@@ -13,7 +13,7 @@ import Home from './components/pages/Home'
 // pages
 
 // Context
-import { UserProvider } from 'context/userContext'
+import { UserProvider } from './context/UserContext'
 // Context
 
 function App() {
