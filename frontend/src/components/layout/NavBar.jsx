@@ -23,13 +23,15 @@ export default function Navbar() {
           {authenticated ? (
             // Exibe quando o usuário está autenticado
             <>
+               <Link to="/pet/mypets">
+                <Button variant="ghost">Meus Pets</Button>
+              </Link>
               <Link to="/user/profile">
                 <Button variant="ghost">Perfil</Button>
               </Link>
               <Link to={'/'}>
               <Button variant="ghost" onClick={logout}>Sair</Button>
               </Link>
-              
             </>
           ) : (
             // Exibe quando o usuário NÃO está autenticado
