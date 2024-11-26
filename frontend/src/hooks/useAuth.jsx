@@ -27,8 +27,8 @@ export default function useAuth() {
             console.log(data);
 
             // Autentica o usuário e redireciona para a home após o cadastro
-            await authUser(data);
-            navigate('/'); // Redireciona para a página inicial (home)
+            await authUser(data)
+            navigate('/') // Redireciona para a página inicial (home)
         } catch (error) {
             msgText = error.response.data.message || 'Erro ao cadastrar'
             msgType = 'error'
@@ -42,5 +42,17 @@ export default function useAuth() {
         localStorage.setItem('token',JSON.stringify(data.token))
     }
 
-    return { authenticated, register }
+    function logout(){
+        const msgText = 'Logout realizado com sucesso!'
+        const msgType = 'Sucesso'
+
+        setAuthenticated(false)
+        localStorage.removeItem('token')
+        api.default.headers.Authorization = undefined
+        navigate('/') 
+
+        setFlashMessage(msgText, msgType)
+    }
+
+    return { authenticated, register,logout }
 }
