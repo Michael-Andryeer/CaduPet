@@ -48,6 +48,10 @@ export default function useAuth() {
         } catch (error) {
             msgText = error.response.data.message
             msgType = 'Erro'
+
+            setFlashMessage(msgText, msgType);
+            setTimeout(() => setFlashMessage('', ''), 5000); // Limpa a mensagem após 5 segundos
+            return; // Interrompe o fluxo para evitar redirecionamento em caso de erro
         }
         setFlashMessage(msgText, msgType)
         navigate('/') 
