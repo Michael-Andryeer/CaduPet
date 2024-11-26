@@ -5,11 +5,13 @@ import { Label } from "../../../components/ui/label"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { ImageIcon } from 'lucide-react'
+import useFlashMessage from '../../../hooks/useFlashMessage'
 
 export default function Profile() {
   const [preview, setPreview] = useState(null)
   const [user, setUser] = useState({})
   const [token] = useState(localStorage.getItem('token') || '')
+  const {setFlashMessage} = useFlashMessage()
   useEffect(() => {
     api.get('/users/checkuser', {
       headers: {
@@ -20,19 +22,35 @@ export default function Profile() {
     });
   }, [token]);
   
-  
   function handleChange(e) {
     setUser({ ...user, [e.target.name]: e.target.value })
   }
 
   function onFileChange(e) {
+    setUser({ ...user, [e.target.name]: e.target.files[0] })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    console.log(user)
-  }
-
+  
+    const formData = new FormData()
+    Object.keys(user).forEach((key) => {
+      formData.append(key, user[key])
+    })
+  
+    try {
+      const response = await api.patch(`/users/edit/${user._id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(token)}`,
+          'Content-Type': 'multipart/form-data'
+        },
+      })
+      
+      setFlashMessage(response.data.message, 'successo')
+    } catch (err) {
+      setFlashMessage(err.response.data.message, 'error')
+    }
+}
   return (
     <section className="container mx-auto py-8">
       <Card className="max-w-2xl mx-auto">
