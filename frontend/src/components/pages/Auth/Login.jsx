@@ -1,68 +1,65 @@
 import { useContext, useState } from 'react';
 import { Context } from '../../../context/UserContext';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card'
 
 function Login() {
-  const [user, setUser] = useState({ email: '', password: '' }); // Inicializando o estado com as chaves necessárias
+  const [user, setUser] = useState({ email: '', password: '' });
   const { login } = useContext(Context);
 
-  // Função para lidar com as mudanças nos campos de entrada
   function handleChange(e) {
     setUser({ ...user, [e.target.name]: e.target.value });
   }
 
-  // Função para lidar com o envio do formulário
   function handleSubmit(e) {
     e.preventDefault();
-    login(user); // Enviando o objeto `user` com `email` e `password` para a função `login`
+    login(user);
   }
 
   return (
-    <section className="flex justify-center items-center h-screen">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6">Login</h1>
+    <div className="flex justify-center items-center min-h-screen bg-background">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Login</CardTitle>
+          <CardDescription>Insira seu login</CardDescription>
+        </CardHeader>
         <form onSubmit={handleSubmit}>
-          {/* Campo de Email */}
-          <div className="mb-4">
-            <label htmlFor="email" className="block font-medium mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email" // Nome do campo no objeto `user`
-              value={user.email} // Ligando ao estado `user`
-              onChange={handleChange}
-              className="border rounded-md p-2 w-full"
-              required
-            />
-          </div>
-
-          {/* Campo de Senha */}
-          <div className="mb-4">
-            <label htmlFor="password" className="block font-medium mb-2">
-              Senha
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password" // Nome do campo no objeto `user`
-              value={user.password} // Ligando ao estado `user`
-              onChange={handleChange}
-              className="border rounded-md p-2 w-full"
-              required
-            />
-          </div>
-
-          {/* Botão de Login */}
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md w-full"
-          >
-            Login
-          </button>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                id="email"
+                name="email"
+                value={user.email}
+                onChange={handleChange}
+                placeholder="Digite seu email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                value={user.password}
+                onChange={handleChange}
+                placeholder="Digite sua senha"
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </CardFooter>
         </form>
-      </div>
-    </section>
+      </Card>
+    </div>
   );
 }
 export default Login;
