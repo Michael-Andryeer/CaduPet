@@ -1,8 +1,20 @@
 import api from '../utils/api';
 import useFlashMessage from './useFlashMessage';
+import { useState,useEffect} from 'react';
+import { useNavigate } from 'react-router-dom'; 
 
 export default function useAuth() {
+    const [ authenticated,setAuthenticated] = useState(false)
     const { setFlashMessage } = useFlashMessage();
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            api.defaults.headers.Authorization = `Bearer${JSON.parse(token)}`
+            setAuthenticated(true)
+        }
+    },[])
 
     async function register(user) {
         let msgText = 'Cadastro realizado com sucesso';
@@ -13,12 +25,22 @@ export default function useAuth() {
                 return response.data;
             });
             console.log(data);
+
+            // Autentica o usuário e redireciona para a home após o cadastro
+            await authUser(data);
+            navigate('/'); // Redireciona para a página inicial (home)
         } catch (error) {
-            msgText = error.response.data.message
+            msgText = error.response.data.message || 'Erro ao cadastrar'
             msgType = 'error'
         }
         setFlashMessage(msgText, msgType)
     }
 
-    return { register }
+    async function authUser(data) {
+        setAuthenticated(true)
+
+        localStorage.setItem('token',JSON.stringify(data.token))
+    }
+
+    return { authenticated, register }
 }
