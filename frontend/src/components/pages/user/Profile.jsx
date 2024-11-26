@@ -1,6 +1,5 @@
-'use client'
-
-import React, { useState } from 'react'
+import api from '../../../utils/api';
+import React, { useEffect, useState } from 'react'
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Button } from "../../../components/ui/button"
@@ -9,14 +8,19 @@ import { ImageIcon } from 'lucide-react'
 
 export default function Profile() {
   const [preview, setPreview] = useState(null)
-  const [user, setUser] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmpassword: '',
-  })
-
+  const [user, setUser] = useState({})
+  const [token] = useState(localStorage.getItem('token') || '')
+  useEffect(() => {
+    api.get('/users/checkuser', {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(token)}`,
+      },
+    }).then((response) => {
+      setUser(response.data);
+    });
+  }, [token]);
+  
+  
   function handleChange(e) {
     setUser({ ...user, [e.target.name]: e.target.value })
   }
