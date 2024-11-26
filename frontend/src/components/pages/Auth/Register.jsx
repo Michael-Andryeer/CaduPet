@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Input from '../../form/Input'
 
 export default function Register() {
@@ -10,7 +10,6 @@ export default function Register() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    // Aqui você pode adicionar a lógica de registro
     console.log(user)
   }
 
