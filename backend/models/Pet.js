@@ -1,7 +1,7 @@
 const mongoose = require('../db/conn')
 const {Schema} = mongoose
 
-const Pet = mongoose.model (
+const Pet = mongoose.model(
     'Pet',
     new Schema({
         name: {
@@ -12,7 +12,7 @@ const Pet = mongoose.model (
             type: Number,
             required: true
         },
-        weigth: {
+        weight: {
             type: Number,
             required: true
         },
@@ -36,4 +36,6 @@ const Pet = mongoose.model (
     }
 ),
 )
+
 module.exports = Pet
+

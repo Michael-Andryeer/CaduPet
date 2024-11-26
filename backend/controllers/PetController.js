@@ -6,13 +6,12 @@ const getUserByToken = require('../helpers/get-user-by-token')
 const objectId = require('mongoose').Types.ObjectId
 // helpers
 
-
-module.exports = class PetController{
+module.exports = class PetController {
 
     // create pet
-    static async create(request, response){
+    static async create(request, response) {
        
-        const {name,age,weigth,color} = request.body
+        const {name, age, weight, color} = request.body
 
         const available = true
 
@@ -25,22 +24,22 @@ module.exports = class PetController{
         }
 
         // validations
-        if (!name){
+        if (!name) {
             response.status(422).json({ message: 'Name is required' })
             return
         }
 
-        if(!age){
+        if (!age) {
             response.status(422).json({ message: 'Age is required' })
             return
         }
 
-        if(!weigth){
-            response.status(422).json({ message: 'Weigth is required' })
+        if (!weight) {
+            response.status(422).json({ message: 'Weight is required' })
             return
         }
 
-        if(!color){
+        if (!color) {
             response.status(422).json({ message: 'Color is required' })
             return
         }
@@ -49,16 +48,17 @@ module.exports = class PetController{
 
         // get pet owner
         const token = getToken(request)
-        const user =  await getUserByToken(token)
+        const user = await getUserByToken(token)
 
         //creating a pet 
 
-        const pet = new Pet({name,
+        const pet = new Pet({
+            name,
             age,
-            weigth,
+            weight,
             color,
             available,
-            images:[],
+            images: [],
             user: {
                 _id: user._id,
                 name: user.name,
@@ -82,7 +82,7 @@ module.exports = class PetController{
         }
     }
 
-    static async getAll(request,response){
+    static async getAll(request, response) {
 
         // Ordena pelos mais novos inseridos
         const pets = await Pet.find().sort('-createAt')
@@ -92,11 +92,11 @@ module.exports = class PetController{
         })
     }
 
-    static async getAllUsersPets(request,response) {
+    static async getAllUsersPets(request, response) {
 
         // get user from token
         const token = getToken(request)
-        const user =  await getUserByToken(token)
+        const user = await getUserByToken(token)
 
         const pets = await Pet.find({'user._id': user._id}).sort('-createdAt')
 
@@ -105,11 +105,11 @@ module.exports = class PetController{
         })
     }
 
-    static async getAllUserAdoptions(request,response){
+    static async getAllUserAdoptions(request, response) {
 
         // get user from token
         const token = getToken(request)
-        const user =  await getUserByToken(token)
+        const user = await getUserByToken(token)
 
         const pets = await Pet.find({'adopter._id': user._id}).sort('-createdAt')
 
@@ -118,18 +118,18 @@ module.exports = class PetController{
         })
     }
 
-    static async getPetById(request,response){
+    static async getPetById(request, response) {
         const id = request.params.id
 
-        if(!objectId.isValid(id)){
+        if (!objectId.isValid(id)) {
             response.status(422).json({ message: 'Invalid id' })
-        return
+            return
         }
 
         // check if pet exists
         const pet = await Pet.findOne({_id: id})
 
-        if(!pet){
+        if (!pet) {
             response.status(404).json({ message: 'Pet not found!' })
             return
         }
@@ -139,26 +139,26 @@ module.exports = class PetController{
         })
     }
 
-    static async removePetById(request,response){
+    static async removePetById(request, response) {
 
         const id = request.params.id
 
         // check if Id is valid
-        if(!objectId.isValid(id)){
+        if (!objectId.isValid(id)) {
             response.status(422).json({ message: 'Invalid id' })
-        return
+            return
         }
 
         const pet = await Pet.findOne({_id: id})
 
-        if(!pet){
+        if (!pet) {
             response.status(404).json({ message: 'Pet not found!' })
             return
         }
 
         // Check if the logged-in user has registered the pet, to prevent a user from removing another user's pet
         const token = getToken(request)
-        const user =  await getUserByToken(token)
+        const user = await getUserByToken(token)
 
 
         if (pet.user._id.toString() !== user._id.toString()) {
@@ -171,27 +171,27 @@ module.exports = class PetController{
         response.status(200).json({ message: 'Pet removed successfully' })
     }
 
-    static async updatePetById(request,response){
+    static async updatePetById(request, response) {
 
         const id = request.params.id
 
-        const {name,age,weigth,color, available} = request.body
+        const {name, age, weight, color, available} = request.body
 
-        const images =  request.files
+        const images = request.files
 
         // The pet's data will be saved here
         const updatedData = {}
 
         const pet = await Pet.findOne({_id: id})
-        if(!pet){
+        if (!pet) {
             response.status(404).json({ message: 'Pet not found!' })
             return
         }
         
         const token = getToken(request)
-        const user =  await getUserByToken(token)
+        const user = await getUserByToken(token)
 
-        if(pet.user._id.toString() !== user._id.toString()) {
+        if (pet.user._id.toString() !== user._id.toString()) {
             response.status(422).json({
                 message: 'You are not authorized to update this pet'
             })
@@ -199,32 +199,32 @@ module.exports = class PetController{
         }
 
         //validations
-        if(!name){
+        if (!name) {
             response.status(422).json({ message: 'Name is required' })
             return
         } else {
             updatedData.name = name
         }
 
-        if(!color){
+        if (!color) {
             response.status(422).json({ message: 'Color is required' })
             return
         } else {
             updatedData.color = color
         }
 
-        if(!age){
+        if (!age) {
             response.status(422).json({ message: 'Age is required' })
             return
         } else {
             updatedData.age = age
         }
 
-        if(!weigth){
-            response.status(422).json({ message: 'Weigth is required' })
+        if (!weight) {
+            response.status(422).json({ message: 'Weight is required' })
             return
         } else {
-            updatedData.weigth = weigth
+            updatedData.weight = weight
         }
 
         // Checks if images is defined and is an array
@@ -237,14 +237,14 @@ module.exports = class PetController{
                 updatedData.images.push(image.filename)
             })
         }
-        await Pet.findByIdAndUpdate(id,updatedData)
+        await Pet.findByIdAndUpdate(id, updatedData)
 
         response.status(200).json({
             message: 'Pet updated successfully',
         })
     }
 
-    static async schedule(request,response){
+    static async schedule(request, response) {
 
         const id = request.params.id
 
@@ -252,7 +252,7 @@ module.exports = class PetController{
         //check if pet exists
         const pet = await Pet.findOne({_id: id})
 
-        if(!pet){
+        if (!pet) {
             response.status(404).json({ message: 'Pet not found!' })
             return
         }
@@ -261,14 +261,14 @@ module.exports = class PetController{
         const token = getToken(request)
         const user = await getUserByToken(token)
 
-        if(pet.user._id.equals(user._id)) {
+        if (pet.user._id.equals(user._id)) {
             response.status(422).json({ message: 'You cannot schedule an appointment for your own pet!' })
             return
         }
 
         // check if user has already scheduled a visit
-        if(pet.adopter) {
-            if(pet.adopter._id.equals(user._id)){
+        if (pet.adopter) {
+            if (pet.adopter._id.equals(user._id)) {
                 response.status(422).json({ message: 'You have already scheduled an appointment for this pet!' })
                 return
             }
@@ -281,19 +281,19 @@ module.exports = class PetController{
             image: user.image,
             phone: user.phone
         }
-        await Pet.findByIdAndUpdate(id,pet)
+        await Pet.findByIdAndUpdate(id, pet)
         
         response.status(200).json({
             message: `The visit has been successfully scheduled, please contact ${pet.user.name} at ${pet.user.phone}`
         })
     }
 
-    static async concludedAdoption (request,response){
+    static async concludedAdoption(request, response) {
         const id = request.params.id
 
-        const pet = await Pet.findOne({_id:id})
+        const pet = await Pet.findOne({_id: id})
 
-        if(!pet){
+        if (!pet) {
             response.status(404).json({ message: 'Pet not found!' })
             return
         }
@@ -301,7 +301,7 @@ module.exports = class PetController{
         const token = getToken(request)
         const user = await getUserByToken(token)
 
-        if(pet.user._id.toString() !== user._id.toString()){
+        if (pet.user._id.toString() !== user._id.toString()) {
             response.status(422).json({ message: 'You are not authorized to conclude this adoption' })
             return
         }
@@ -309,7 +309,7 @@ module.exports = class PetController{
 
         pet.available = false
 
-        await Pet.findByIdAndUpdate(id,pet)
+        await Pet.findByIdAndUpdate(id, pet)
 
         response.status(200).json({
             message: 'Adoption concluded successfully',

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -16,41 +17,99 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon } from 'lucide-react';
+import useFlashMessage from "../../hooks/useFlashMessage";
+import api from "../../utils/api";
 
 function PetForm({ petData }) {
-  const [pet, setPet] = useState(petData || {});
+  const [pet, setPet] = useState(petData || {
+    name: '',
+    age: '',
+    weight: '',
+    color: '',
+    images: []
+  });
   const [preview, setPreview] = useState([]);
   const colors = ["Branco", "Preto", "Cinza", "Caramelo"];
+  const [token] = useState(localStorage.getItem('token') || '');
+  const { setFlashMessage } = useFlashMessage();
+  const navigate = useNavigate();
 
   function handleChange(e) {
-    setPet({ ...pet, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    if (name === 'weight') {
+      // Ensure weight is always a valid number or empty string
+      const numValue = value === '' ? '' : parseFloat(value);
+      setPet(prev => ({ ...prev, [name]: numValue }));
+    } else {
+      setPet(prev => ({ ...prev, [name]: value }));
+    }
   }
 
   function onFileChange(e) {
     const files = Array.from(e.target.files);
-    setPet({ ...pet, images: files });
+    setPet(prev => ({ ...prev, images: files }));
     setPreview(files);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Stricter validations
+    if (!pet.name?.trim()) {
+      setFlashMessage('Nome é obrigatório', 'error');
+      return;
+    }
+
+    if (!pet.age?.trim()) {
+      setFlashMessage('Idade é obrigatória', 'error');
+      return;
+    }
+
+    if (!pet.weight || isNaN(Number(pet.weight)) || Number(pet.weight) <= 0) {
+      setFlashMessage('Por favor, insira um peso válido maior que 0', 'error');
+      return;
+    }
+
+    if (!pet.color) {
+      setFlashMessage('Cor é obrigatória', 'error');
+      return;
+    }
+
+    if (!pet.images?.length) {
+      setFlashMessage('Pelo menos uma imagem é obrigatória', 'error');
+      return;
+    }
+
     const formData = new FormData();
 
-    // Append all pet data to formData
-    Object.keys(pet).forEach((key) => {
-      if (key === "images") {
-        for (let i = 0; i < pet.images.length; i++) {
-          formData.append("images", pet.images[i]);
-        }
-      } else {
-        formData.append(key, pet[key]);
-      }
+    // Ensure all fields are strings in FormData
+    formData.append('name', pet.name.trim());
+    formData.append('age', pet.age.trim());
+    formData.append('weight', pet.weight.toString());
+    formData.append('color', pet.color);
+
+    // Add images
+    pet.images.forEach((image) => {
+      formData.append('images', image);
     });
 
-    // Add your API call here
-    // Example: await api.post('/pets/create', formData)
+    try {
+      const response = await api.post('pets/create', formData, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setFlashMessage(response.data.message, 'success');
+      navigate('/pets/mypets');
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Erro ao cadastrar pet';
+      setFlashMessage(errorMessage, 'error');
+      console.error('Error details:', error.response?.data);
+    }
   }
 
   return (
@@ -98,6 +157,7 @@ function PetForm({ petData }) {
                       accept="image/*"
                       onChange={onFileChange}
                       className="max-w-[230px]"
+                      required
                     />
                   </div>
                 </Label>
@@ -113,8 +173,9 @@ function PetForm({ petData }) {
                   id="name"
                   name="name"
                   placeholder="Digite o nome"
-                  value={pet.name || ""}
+                  value={pet.name}
                   onChange={handleChange}
+                  required
                 />
               </div>
 
@@ -125,29 +186,34 @@ function PetForm({ petData }) {
                   id="age"
                   name="age"
                   placeholder="Digite a idade"
-                  value={pet.age || ""}
+                  value={pet.age}
                   onChange={handleChange}
+                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="weight">Peso do Pet:</Label>
+                <Label htmlFor="weight">Peso do Pet (kg):</Label>
                 <Input
                   type="number"
                   id="weight"
                   name="weight"
-                  placeholder="Digite o peso"
-                  value={pet.weight || ""}
+                  placeholder="Digite o peso em kg"
+                  value={pet.weight}
                   onChange={handleChange}
                   step="0.1"
+                  min="0.1"
+                  required
+                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label>Selecione a cor:</Label>
                 <Select
-                  onValueChange={(value) => setPet({ ...pet, color: value })}
-                  value={pet.color || ""}
+                  onValueChange={(value) => setPet(prev => ({ ...prev, color: value }))}
+                  value={pet.color}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma opção" />
@@ -162,7 +228,6 @@ function PetForm({ petData }) {
                 </Select>
               </div>
             </div>
-
             <Button type="submit" className="w-full bg-green-500 hover:bg-green-600">
               Cadastrar Pet
             </Button>
@@ -172,5 +237,5 @@ function PetForm({ petData }) {
     </section>
   );
 }
-
 export default PetForm;
+
