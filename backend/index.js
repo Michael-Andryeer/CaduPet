@@ -1,20 +1,34 @@
 // imports
-const express = require('express')
-const cors = require('cors')
-const UserRoutes = require('./routes/UserRoutes')
-const PetRoutes = require('./routes/PetRoutes')
+const express = require('express');
+const cors = require('cors');
+const UserRoutes = require('./routes/UserRoutes');
+const PetRoutes = require('./routes/PetRoutes');
 // imports
 
-const app = express()
+const app = express();
 
 // Config JSON response
-app.use(express.json())
+app.use(express.json());
 
-// Solve cors 
-app.use(cors({credentials: true, origin:'http://localhost:3000'}))
+// Solve CORS
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5137']; // Adicione as origens permitidas aqui
+
+app.use(
+    cors({
+        credentials: true,
+        origin: (origin, callback) => {
+            // Permite origens da lista ou requisições sem origem (ex.: Postman)
+            if (allowedOrigins.includes(origin) || !origin) {
+                callback(null, true); // Permite a requisição
+            } else {
+                callback(new Error('Not allowed by CORS')); // Bloqueia a requisição
+            }
+        },
+    })
+);
 
 // public folder for images
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 // Routes
 app.use('/users', UserRoutes);
