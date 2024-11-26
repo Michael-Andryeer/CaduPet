@@ -23,7 +23,6 @@ function Login() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
-          <CardDescription>Insira seu login</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -35,7 +34,7 @@ function Login() {
                 name="email"
                 value={user.email}
                 onChange={handleChange}
-                placeholder="Digite seu email"
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -47,7 +46,7 @@ function Login() {
                 name="password"
                 value={user.password}
                 onChange={handleChange}
-                placeholder="Digite sua senha"
+                placeholder="Enter your password"
                 required
               />
             </div>
