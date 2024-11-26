@@ -110,6 +110,8 @@ function PetForm({ petData }) {
       setFlashMessage(errorMessage, 'error');
       console.error('Error details:', error.response?.data);
     }
+
+    navigate('/'); // Updated navigation
   }
 
   return (
