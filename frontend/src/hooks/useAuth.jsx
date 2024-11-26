@@ -50,7 +50,7 @@ export default function useAuth() {
             msgType = 'Erro'
         }
         setFlashMessage(msgText, msgType)
-
+        navigate('/') 
     }
 
     async function authUser(data) {
