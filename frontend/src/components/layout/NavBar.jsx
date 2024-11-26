@@ -4,7 +4,7 @@ import { PawPrint } from 'lucide-react';
 // Context
 import { Context } from '../../context/UserContext';
 import { useContext } from "react";
-// Context
+
 export default function Navbar() {
   const { authenticated, logout } = useContext(Context);
   return (
@@ -22,7 +22,15 @@ export default function Navbar() {
           </Link>
           {authenticated ? (
             // Exibe quando o usuário está autenticado
-            <Button variant="ghost" onClick={logout}>Sair</Button>
+            <>
+              <Link to="/user/profile">
+                <Button variant="ghost">Perfil</Button>
+              </Link>
+              <Link to={'/'}>
+              <Button variant="ghost" onClick={logout}>Sair</Button>
+              </Link>
+              
+            </>
           ) : (
             // Exibe quando o usuário NÃO está autenticado
             <>
