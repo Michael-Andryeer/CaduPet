@@ -10,6 +10,7 @@ export default function Register() {
 
   function handleSubmit(e) {
     e.preventDefault()
+    // Enviar usuario para o banco de dados
     console.log(user)
   }
 
