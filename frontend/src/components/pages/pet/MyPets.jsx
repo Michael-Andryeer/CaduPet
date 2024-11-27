@@ -5,7 +5,7 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Button } from "../../../components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "../../../components/ui/avatar"
 import { Separator } from "../../../components/ui/separator"
-import { Pencil, Trash2 } from 'lucide-react'
+import {  Trash2 } from 'lucide-react'
 
 export default function MyPets() {
   const [pets, setPets] = useState([])
