@@ -74,16 +74,7 @@ export default function MyPets() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="border-blue-700 text-blue-700 hover:bg-blue-50"
-                    asChild
-                  >
-                    <Link to={`/pet/edit/${pet._id}`}>
-                      <Pencil className="w-4 h-4 mr-2" />
-                      Editar
-                    </Link>
-                  </Button>
+                  
                   <Button
                     variant="outline"
                     className="border-blue-700 text-blue-700 hover:bg-blue-50"
