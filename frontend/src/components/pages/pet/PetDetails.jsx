@@ -59,6 +59,9 @@ function PetDetails() {
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold mb-2">{pet.name}</h1>
+                {!pet.available && (
+                  <p className="text-green-600 font-medium">Adotado</p>
+                )}
               </div>
 
               <Card className="overflow-hidden border-none shadow-lg">
@@ -131,18 +134,20 @@ function PetDetails() {
                 </Card>
               )}
 
-              <Button
-                onClick={schedule}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
-                disabled={!token || pet.adopter}
-              >
-                {!token 
-                  ? 'Faça login para solicitar uma visita'
-                  : pet.adopter
-                    ? 'Pet já agendado para visita'
-                    : 'Solicitar uma Visita'
-                }
-              </Button>
+              {pet.available && (
+                <Button
+                  onClick={schedule}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                  disabled={!token || pet.adopter}
+                >
+                  {!token 
+                    ? 'Faça login para solicitar uma visita'
+                    : pet.adopter
+                      ? 'Pet já agendado para visita'
+                      : 'Solicitar uma Visita'
+                  }
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

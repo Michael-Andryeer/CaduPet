@@ -75,7 +75,7 @@ export default function MyAdoptions() {
                     </div>
                   </div>
                   <div className="text-blue-600 font-medium">
-                    Adoção em processo
+                    {pet.available ? 'Adoção em processo' : 'Adotado'}
                   </div>
                 </div>
                 {index < pets.length - 1 && <Separator />}
@@ -91,4 +91,3 @@ export default function MyAdoptions() {
     </div>
   )
 }
-
