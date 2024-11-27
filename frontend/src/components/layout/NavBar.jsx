@@ -26,6 +26,9 @@ export default function Navbar() {
                <Link to="/pet/mypets">
                 <Button variant="ghost">Meus Pets</Button>
               </Link>
+              <Link to="/pet/myadoptions">
+                <Button variant="ghost">Minhas adoções</Button>
+              </Link>
               <Link to="/user/profile">
                 <Button variant="ghost">Perfil</Button>
               </Link>

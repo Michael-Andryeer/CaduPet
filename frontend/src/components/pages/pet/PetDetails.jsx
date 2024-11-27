@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../../utils/api'
 import { Card, CardContent } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
-import { Separator } from "../../../components/ui/separator"
 import useFlashMessage from '../../../hooks/useFlashMessage'
 
 function PetDetails() {
@@ -50,7 +49,7 @@ function PetDetails() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Card className="max-w-3xl mx-auto">
+      <Card className="max-w-2xl mx-auto">
         <CardContent className="p-6">
           {loading ? (
             <div className="text-center py-8">
@@ -62,41 +61,62 @@ function PetDetails() {
                 <h1 className="text-2xl font-bold mb-2">{pet.name}</h1>
               </div>
 
-              <div className="w-full relative overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center max-h-[500px]">
-                {pet.images && pet.images[0] ? (
-                  <img
-                    src={`http://localhost:5555/images/pets/${pet.images[0]}`}
-                    alt={pet.name}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    Sem imagem disponível
+              <Card className="overflow-hidden border-none shadow-lg">
+                <div className="relative bg-gradient-to-b from-white to-gray-50">
+                  <div className="aspect-square w-full relative overflow-hidden">
+                    {pet.images && pet.images[0] ? (
+                      <img
+                        src={`http://localhost:5555/images/pets/${pet.images[0]}`}
+                        alt={pet.name}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                        Sem imagem disponível
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              </Card>
 
-              <Separator />
+              {pet.images && pet.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-4 mt-4">
+                  {pet.images.slice(1).map((image, index) => (
+                    <Card key={index} className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+                      <div className="aspect-square relative">
+                        <img
+                          src={`http://localhost:5555/images/pets/${image}`}
+                          alt={`${pet.name} - imagem ${index + 2}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
 
-              <div className="grid gap-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Idade:</span>
-                  <span className="font-medium">{pet.age} anos</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Peso:</span>
-                  <span className="font-medium">{pet.weight} kg</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Cor:</span>
-                  <span className="font-medium">{pet.color}</span>
-                </div>
-              </div>
+              <Card className="border-none shadow-md">
+                <CardContent className="p-4">
+                  <div className="grid gap-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Idade:</span>
+                      <span className="font-medium">{pet.age} anos</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Peso:</span>
+                      <span className="font-medium">{pet.weight} kg</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Cor:</span>
+                      <span className="font-medium">{pet.color}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {pet.user && (
-                <>
-                  <Separator />
-                  <div className="space-y-2">
+                <Card className="border-none shadow-md">
+                  <CardContent className="p-4 space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Responsável:</span>
                       <span className="font-medium">{pet.user.name}</span>
@@ -107,13 +127,13 @@ function PetDetails() {
                         <span className="font-medium">{pet.user.phone}</span>
                       </div>
                     )}
-                  </div>
-                </>
+                  </CardContent>
+                </Card>
               )}
 
               <Button
                 onClick={schedule}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
                 disabled={!token || pet.adopter}
               >
                 {!token 
