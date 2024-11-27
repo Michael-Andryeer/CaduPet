@@ -14,20 +14,21 @@ function PetDetails() {
   const [token] = useState(localStorage.getItem('token') || '')
 
   useEffect(() => {
-    async function fetchPet() {
+    const fetchPet = async () => {
       setLoading(true)
       try {
         const response = await api.get(`/pets/${id}`)
-        setPet(response.data.pet) // Ajustado para acessar response.data.pet
-        setLoading(false)
+        setPet(response.data.pet)
       } catch (error) {
         console.log(error)
         setFlashMessage('Erro ao carregar detalhes do pet', 'error')
+      } finally {
         setLoading(false)
       }
     }
+
     fetchPet()
-  }, [id, setFlashMessage])
+  }, [id]) // Removido setFlashMessage das dependências para evitar loop infinito
 
   async function schedule() {
     let msgType = 'success'
@@ -60,12 +61,13 @@ function PetDetails() {
                 <h1 className="text-2xl font-bold mb-2">{pet.name}</h1>
               </div>
 
-              <div className="aspect-video w-full relative overflow-hidden rounded-lg bg-gray-100">
+              {/* Ajustado o container da imagem para max-h-[500px] e removido aspect-video */}
+              <div className="w-full relative overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center max-h-[500px]">
                 {pet.images && pet.images[0] ? (
                   <img
                     src={`http://localhost:5555/images/pets/${pet.images[0]}`}
                     alt={pet.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain" // Mudado para object-contain
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -74,6 +76,7 @@ function PetDetails() {
                 )}
               </div>
 
+              {/* Resto do componente permanece o mesmo */}
               {pet.images && pet.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-4">
                   {pet.images.slice(1).map((image, index) => (
@@ -137,6 +140,4 @@ function PetDetails() {
     </div>
   )
 }
-
 export default PetDetails
-
