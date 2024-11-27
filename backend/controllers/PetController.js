@@ -245,35 +245,37 @@ module.exports = class PetController {
     }
 
     static async schedule(request, response) {
-
         const id = request.params.id
-
-
+    
+        // Check if id is a valid ObjectId
+        if (!objectId.isValid(id)) {
+            return response.status(422).json({ message: 'Invalid pet ID' })
+        }
+    
         //check if pet exists
         const pet = await Pet.findOne({_id: id})
-
+    
         if (!pet) {
-            response.status(404).json({ message: 'Pet not found!' })
-            return
+            return response.status(404).json({ message: 'Pet not found!' })
         }
-
+    
         // check if user registered the pet
         const token = getToken(request)
         const user = await getUserByToken(token)
-
+    
         if (pet.user._id.equals(user._id)) {
-            response.status(422).json({ message: 'You cannot schedule an appointment for your own pet!' })
-            return
+            return response.status(422).json({ message: 'You cannot schedule an appointment for your own pet!' })
         }
-
+    
         // check if user has already scheduled a visit
         if (pet.adopter) {
             if (pet.adopter._id.equals(user._id)) {
-                response.status(422).json({ message: 'You have already scheduled an appointment for this pet!' })
-                return
+                return response.status(422).json({ message: 'You have already scheduled an appointment for this pet!' })
+            } else {
+                return response.status(422).json({ message: 'This pet has already been scheduled for a visit by another user!' })
             }
         }
-
+    
         // add user to pet
         pet.adopter = {
             _id: user._id,
@@ -281,11 +283,17 @@ module.exports = class PetController {
             image: user.image,
             phone: user.phone
         }
-        await Pet.findByIdAndUpdate(id, pet)
-        
-        response.status(200).json({
-            message: `The visit has been successfully scheduled, please contact ${pet.user.name} at ${pet.user.phone}`
-        })
+    
+        try {
+            await Pet.findByIdAndUpdate(id, pet)
+            
+            return response.status(200).json({
+                message: `The visit has been successfully scheduled, please contact ${pet.user.name} at ${pet.user.phone}`
+            })
+        } catch (error) {
+            console.error('Error scheduling visit:', error)
+            return response.status(500).json({ message: 'An error occurred while scheduling the visit' })
+        }
     }
 
     static async concludedAdoption(request, response) {
